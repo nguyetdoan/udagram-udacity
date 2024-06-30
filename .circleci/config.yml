@@ -15,6 +15,7 @@ jobs:
       - node/install:
           node-version: '14.15'         
       - checkout
+
       # Use root level package.json to install dependencies in the frontend app
       - run:
           name: Install Front-End Dependencies
@@ -51,6 +52,13 @@ jobs:
       - eb/setup
       - aws-cli/setup
       - checkout
+      # Set environment variables in Elastic Beanstalk
+      - run:
+          name: Set Environment Variables in EB
+          command: |
+            eb init -p node.js udagram --region us-east-1
+            eb use udagram-api-env
+            eb setenv POSTGRES_USERNAME=$POSTGRES_USERNAME POSTGRES_HOST=$POSTGRES_HOST DB_PORT=$DB_PORT PORT=$PORT POSTGRES_PASSWORD=$POSTGRES_PASSWORD POS_DIALECT=$POS_DIALECT POSTGRES_DB=$POSTGRES_DB AWS_REGION=$AWS_REGION AWS_PROFILE=$AWS_PROFILE AWS_BUCKET=$AWS_BUCKET AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY JWT_SECRET=$JWT_SECRET
       - run:
           name: Deploy Frontend
           # TODO: Install, build, deploy in both apps
@@ -60,7 +68,6 @@ jobs:
           name: Deploy API
           command: |
             npm run api:deploy 
-            
 workflows:
   udagram:
     jobs:
